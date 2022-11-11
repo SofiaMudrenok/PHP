@@ -1,9 +1,12 @@
 <h1>Palivo.ua</h1>
 <?php
+include 'DBConnect.php';
+
 spl_autoload_register(function ($class_name) {
     include $class_name . '.php';
 });
 
+$RepoFuelstations = new Repo($dbh);
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -14,24 +17,37 @@ if (empty($_SESSION['Fuelstations'])) {
 }
 
 $actionToDo = $_POST['action'];
-echo $_SESSION['Fuelstations']->showFuelstations();
-if ($actionToDo == 'add') {
-    if (Fuelstation::validationData($_POST)) {
-        $_SESSION['Fuelstations']->addFuelstation(
-            new Fuelstation(5, $_POST)
-        );
+if ($actionToDo == 'add'){
+    if(Fuelstation::validationData($_POST)){
+        $RepoFuelstations->create($_POST);
     }
-} elseif ($actionToDo == 'edit') {
-    if (Fuelstation::validationData($_POST)) {
-        $_SESSION['Fuelstations']->editFuelstation(
-            $_POST
-        );
-    }
-} elseif ($actionToDo == 'filter') { echo Show::showFuelstations($_SESSION['Fuelstations']->filter($_POST['owner'], $_POST['fuel']));
-} elseif ($actionToDo == 'save') { SaveAndLoad::save($_SESSION['Fuelstations']->fuelstations);
-} elseif ($actionToDo == 'load') { SaveAndLoad::load();
 }
-echo Show::showFuelstations($_SESSION['Fuelstations']->fuestatins)
+elseif ($actionToDo == 'edit') {
+    if (Fuelstation::validationDataClients($_POST)) {
+
+        $RepoFuelstations->update($_POST);
+    }
+} elseif ($actionToDo == 'delete') {
+    $RepoFuelstations->delete($_POST);
+}
+//echo $_SESSION['Fuelstations']->showFuelstations();
+//if ($actionToDo == 'add') {
+//    if (Fuelstation::validationData($_POST)) {
+//        $_SESSION['Fuelstations']->addFuelstation(
+//            new Fuelstation(5, $_POST)
+//        );
+//    }
+//} elseif ($actionToDo == 'edit') {
+//    if (Fuelstation::validationData($_POST)) {
+//        $_SESSION['Fuelstations']->editFuelstation(
+//            $_POST
+//        );
+//   } }
+// elseif ($actionToDo == 'filter') { echo Show::showFuelstations($_SESSION['Fuelstations']->filter($_POST['owner'], $_POST['fuel']));
+//} elseif ($actionToDo == 'save') { SaveAndLoad::save($_SESSION['Fuelstations']->fuelstations);
+//} elseif ($actionToDo == 'load') { SaveAndLoad::load();
+//}
+echo Show::showFuelstations($RepoFuelstations->read())
 ?>
 <br>
 <form action='<?= $_SERVER['PHP_SELF'] ?>' method='post' id='filterForm'>
